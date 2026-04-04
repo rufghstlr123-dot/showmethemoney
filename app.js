@@ -130,6 +130,8 @@ function init() {
 }
 
 async function saveData(doLock = false) {
+    if (state.viewMode !== 'daily') return;
+    
     // If the data is being loaded by the listener, don't trigger a save loop
     if (state.isLocked && !doLock && state.userMode !== 'admin') return;
 
