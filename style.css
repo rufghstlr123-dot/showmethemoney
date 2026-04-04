@@ -55,6 +55,7 @@ body {
 .logo {
     font-size: 1.25rem;
     font-weight: 700;
+    font-family: 'Outfit', sans-serif;
     color: var(--primary-color);
     margin: 0;
     padding: 24px;
