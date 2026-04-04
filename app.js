@@ -182,20 +182,23 @@ async function loadData() {
     if (state.viewMode === 'monthly' || state.viewMode === 'weekly') {
         const year = state.currentDate.getFullYear();
         const month = state.currentDate.getMonth();
-        const monthStr = String(month + 1).padStart(2, '0');
+
+        let start, end;
+        if (state.viewMode === 'monthly') {
+            start = new Date(year, month, 1);
+            end = new Date(year, month + 1, 0); // Last day of month
+        } else {
+            const range = getMonthWeekRange(state.currentDate);
+            start = range.start;
+            end = range.end;
+        }
 
         // Fetch the entire month data at once for aggregation Efficiency
         const dbRef = ref(db, `closing_v2/daily`);
         const snapshot = await get(dbRef);
         const allData = snapshot.val() || {};
 
-        if (state.viewMode === 'monthly') {
-            const prefix = `${year}-${monthStr}-`;
-            processAggregation(allData, prefix, 'monthly');
-        } else {
-            const { start, end } = getMonthWeekRange(state.currentDate);
-            processAggregation(allData, null, 'weekly', start, end);
-        }
+        processAggregation(allData, state.viewMode, start, end);
     } else {
         // Real-time listener for Daily view
         const path = getDatePath(state.currentDate);
@@ -238,7 +241,7 @@ function updateUIOnly() {
     applyLockVisuals();
 }
 
-function processAggregation(allData, prefix, mode, start, end) {
+function processAggregation(allData, mode, start, end) {
     // Reset totals
     state.pisAmount = 0;
     state.giftOpenCount = { 5000: null, 10000: null, 50000: null };
@@ -246,14 +249,15 @@ function processAggregation(allData, prefix, mode, start, end) {
     state.giftCloseCount = { 5000: null, 10000: null, 50000: null };
 
     const dailyDiscrepancies = [];
+    
+    // Normalize start/end to midnight for clean comparison
+    const sTime = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+    const eTime = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+
     const targetDates = Object.keys(allData).filter(key => {
-        if (mode === 'monthly') return key.startsWith(prefix);
-        if (mode === 'weekly') {
-            const dStr = key; // YYYY-MM-DD
-            const d = new Date(dStr);
-            return d >= start && d <= end;
-        }
-        return false;
+        const d = new Date(key);
+        const dTime = d.getTime();
+        return dTime >= sTime && dTime <= eTime;
     }).sort();
 
     if (targetDates.length === 0) {
