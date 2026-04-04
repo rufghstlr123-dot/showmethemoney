@@ -678,7 +678,8 @@ function setupEventListeners() {
             saveData();
             state.viewMode = 'daily';
             elements.navDaily.classList.add('active');
-            elements.navMonthly.classList.remove('active');
+            if (elements.navMonthly) elements.navMonthly.classList.remove('active');
+            if (elements.navWeekly) elements.navWeekly.classList.remove('active');
             loadData();
             renderDate();
             calculateTotals();
@@ -692,6 +693,7 @@ function setupEventListeners() {
             state.viewMode = 'monthly';
             elements.navMonthly.classList.add('active');
             elements.navDaily.classList.remove('active');
+            elements.navMonthly.classList.add('active');
             if (elements.navWeekly) elements.navWeekly.classList.remove('active');
             loadData();
             renderDate();
@@ -706,7 +708,7 @@ function setupEventListeners() {
             state.viewMode = 'weekly';
             elements.navWeekly.classList.add('active');
             elements.navDaily.classList.remove('active');
-            elements.navMonthly.classList.remove('active');
+            if (elements.navMonthly) elements.navMonthly.classList.remove('active');
             loadData();
             renderDate();
             calculateTotals();
