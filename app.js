@@ -182,23 +182,27 @@ async function loadData() {
     if (state.viewMode === 'monthly' || state.viewMode === 'weekly') {
         const year = state.currentDate.getFullYear();
         const month = state.currentDate.getMonth();
-
-        let start, end;
+        
+        let startStr, endStr;
         if (state.viewMode === 'monthly') {
-            start = new Date(year, month, 1);
-            end = new Date(year, month + 1, 0); // Last day of month
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const y = year;
+            const m = String(month + 1).padStart(2, '0');
+            startStr = `${y}-${m}-01`;
+            endStr = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
         } else {
             const range = getMonthWeekRange(state.currentDate);
-            start = range.start;
-            end = range.end;
+            const s = range.start;
+            const e = range.end;
+            startStr = `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`;
+            endStr = `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`;
         }
-
-        // Fetch the entire month data at once for aggregation Efficiency
+        
         const dbRef = ref(db, `closing_v2/daily`);
         const snapshot = await get(dbRef);
         const allData = snapshot.val() || {};
 
-        processAggregation(allData, state.viewMode, start, end);
+        processAggregation(allData, state.viewMode, startStr, endStr);
     } else {
         // Real-time listener for Daily view
         const path = getDatePath(state.currentDate);
@@ -241,7 +245,7 @@ function updateUIOnly() {
     applyLockVisuals();
 }
 
-function processAggregation(allData, mode, start, end) {
+function processAggregation(allData, mode, startStr, endStr) {
     // Reset totals
     state.pisAmount = 0;
     state.giftOpenCount = { 5000: null, 10000: null, 50000: null };
@@ -250,14 +254,9 @@ function processAggregation(allData, mode, start, end) {
 
     const dailyDiscrepancies = [];
     
-    // Normalize start/end to midnight for clean comparison
-    const sTime = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-    const eTime = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
-
+    // Using string comparison (YYYY-MM-DD) for 100% robustness over timezones
     const targetDates = Object.keys(allData).filter(key => {
-        const d = new Date(key);
-        const dTime = d.getTime();
-        return dTime >= sTime && dTime <= eTime;
+        return key >= startStr && key <= endStr;
     }).sort();
 
     if (targetDates.length === 0) {
