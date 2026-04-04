@@ -264,13 +264,23 @@ function processAggregation(allData, mode, startStr, endStr) {
         return;
     }
 
-    // 1. Opening: First entry in range
-    const firstData = allData[targetDates[0]];
-    if (firstData && firstData.giftOpen) state.giftOpenCount = { ...firstData.giftOpen };
+    // 1. Opening: Find the FIRST day in the range that actually has non-empty opening data
+    for (let i = 0; i < targetDates.length; i++) {
+        const dData = allData[targetDates[i]];
+        if (dData && dData.giftOpen && Object.values(dData.giftOpen).some(v => v !== null && v !== '')) {
+            state.giftOpenCount = { ...dData.giftOpen };
+            break;
+        }
+    }
 
-    // 2. Closing: Last entry in range
-    const lastData = allData[targetDates[targetDates.length - 1]];
-    if (lastData && lastData.giftClose) state.giftCloseCount = { ...lastData.giftClose };
+    // 2. Closing: Find the LAST day in the range that actually has non-empty closing data
+    for (let i = targetDates.length - 1; i >= 0; i--) {
+        const dData = allData[targetDates[i]];
+        if (dData && dData.giftClose && Object.values(dData.giftClose).some(v => v !== null && v !== '')) {
+            state.giftCloseCount = { ...dData.giftClose };
+            break;
+        }
+    }
 
     // 3. Totals and Diffs
     targetDates.forEach(key => {
