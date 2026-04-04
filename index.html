@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서비스데스크 시재 관리표</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">서비스데스크 시재 관리표</div>
+            <nav class="nav-menu">
+                <button id="nav-daily" class="nav-item active"><span class="icon">📊</span> 일별 시재 마감</button>
+                <button id="nav-monthly" class="nav-item"><span class="icon">🗓️</span> 월별 시재 마감</button>
+                <button id="nav-weekly" class="nav-item"><span class="icon">📅</span> 주차별 시재 마감</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="author-group">
+                    <label for="input-author">작성자</label>
+                    <input type="text" id="input-author" placeholder="성명을 입력하세요">
+                </div>
+                <button id="btn-save-all" class="btn btn-primary" style="width: 100%" disabled>일 마감</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content-area">
+            <!-- Header Section -->
+            <header class="main-header">
+                <div class="date-navigator">
+                    <button id="btn-prev-day" class="btn-icon">◀</button>
+                    <div class="calendar-trigger" id="calendar-trigger">
+                        <h2 id="current-date-display">2026년 4월 4일 토요일</h2>
+                    </div>
+                    <button id="btn-next-day" class="btn-icon">▶</button>
+                </div>
+                <div class="user-status-container">
+                <!-- Guest Mode UI -->
+                <div id="guest-header" class="user-pill guest">
+                    <span class="pill-badge">GUEST</span>
+                    <span class="pill-label">게스트 모드</span>
+                    <button id="btn-admin-login" class="btn-pill-action">관리자 로그인</button>
+                </div>
+                
+                <!-- Admin Mode UI -->
+                <div id="admin-header" class="user-pill admin" style="display: none;">
+                    <span class="pill-badge">ADMIN</span>
+                    <span class="pill-label">관리자 모드</span>
+                    <button id="btn-admin-logout" class="btn-pill-action logout">로그아웃</button>
+                </div>
+            </div>
+            </header>
+
+            <!-- Main Content Grid -->
+            <div class="content-grid">
+                <!-- Opening Gift Card Panel -->
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>개점 상품권 시재</h3>
+                    </div>
+                    <div class="gift-card-container">
+                        <table class="cash-table">
+                            <thead>
+                                <tr>
+                                    <th>권종</th>
+                                    <th>수량</th>
+                                    <th>금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>5,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-open" data-value="5000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-open" id="gift-open-5000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>10,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-open" data-value="10000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-open" id="gift-open-10000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>50,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-open" data-value="50000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-open" id="gift-open-50000">0원</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">합계</td>
+                                    <td id="display-gift-open-total">0원</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Gift Card Issuance (상품권 불출) -->
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>상품권 불출</h3>
+                    </div>
+                    <div class="gift-card-container">
+                        <table class="cash-table">
+                            <thead>
+                                <tr>
+                                    <th>권종</th>
+                                    <th>수량</th>
+                                    <th>금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>5,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-out" data-value="5000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-out" id="gift-out-5000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>10,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-out" data-value="10000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-out" id="gift-out-10000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>50,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-out" data-value="50000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-out" id="gift-out-50000">0원</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">합계</td>
+                                    <td id="display-gift-out-total">0원</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Closing Gift Card Panel -->
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>폐점 상품권 시재</h3>
+                    </div>
+                    <div class="gift-card-container">
+                        <table class="cash-table">
+                            <thead>
+                                <tr>
+                                    <th>권종</th>
+                                    <th>수량</th>
+                                    <th>금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>5,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-close" data-value="5000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-close" id="gift-close-5000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>10,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-close" data-value="10000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-close" id="gift-close-10000">0원</td>
+                                </tr>
+                                <tr>
+                                    <td>50,000원권</td>
+                                    <td>
+    <input type="text" inputmode="numeric" class="gift-input-close" data-value="50000">
+    <span class="monthly-text"></span>
+</td>
+                                    <td class="gift-calc-close" id="gift-close-50000">0원</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">합계</td>
+                                    <td id="display-gift-close-total">0원</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Result Dashboard -->
+            <section class="result-dashboard">
+                <div class="result-item">
+                    <span class="label">PIS 지급내역</span>
+                    <div class="result-input-container">
+                        <input type="text" inputmode="numeric" id="final-book-balance" class="result-input" placeholder="0원">
+                        <span class="monthly-text" id="monthly-pis-text"></span>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <span class="label">실제 시재 총액</span>
+                    <span class="value" id="final-physical-balance">0원</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">전산 시재 총액</span>
+                    <span class="value" id="total-difference">0원</span>
+                </div>
+                <!-- Final Discrepancy (Full Width) -->
+                <div class="result-item full-width highlight" id="final-diff-container">
+                    <span class="label">최종 정산</span>
+                    <span class="value" id="final-discrepancy">0원</span>
+                </div>
+
+                <!-- Monthly Only Daily Details -->
+                <div id="monthly-discrepancy-list" class="monthly-only" style="grid-column: 1 / -1; display: contents;">
+                    <!-- JS will append individual result-item cards here -->
+                </div>
+            </section>
+            <p class="result-note">+ 금액일 경우, 상품권 과다 / - 금액일 경우, 상품권 부족</p>
+        </main>
+    </div>
+
+    <!-- Custom Calendar Modal -->
+    <div id="calendar-modal" class="modal">
+        <div class="modal-overlay" id="calendar-overlay"></div>
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <button id="cal-prev-month" class="btn-icon">◀</button>
+                <h3 id="cal-month-year">2026년 4월</h3>
+                <button id="cal-next-month" class="btn-icon">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+            </div>
+            <div id="calendar-days" class="calendar-grid">
+                <!-- Days will be injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
