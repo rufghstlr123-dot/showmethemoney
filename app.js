@@ -83,6 +83,7 @@ function parseNumber(str) {
 }
 
 function formatNumber(n) {
+    if (n === null || n === undefined || isNaN(n) || n === "") return "";
     return new Intl.NumberFormat('ko-KR').format(n);
 }
 
@@ -326,29 +327,30 @@ function renderAggregatedUI(dailyDiscrepancies, mode) {
 function syncFormsWithState() {
     if (elements.inputAuthor) elements.inputAuthor.value = state.author || '';
     if (elements.finalBook) {
-        const val = (state.pisAmount === null) ? '' : formatNumber(state.pisAmount);
-        elements.finalBook.value = val;
+        const val = state.pisAmount;
+        const textVal = (val === null || val === undefined || isNaN(val)) ? '' : formatNumber(val);
+        elements.finalBook.value = textVal;
         const pisSpan = document.getElementById('monthly-pis-text');
-        if (pisSpan) pisSpan.textContent = val;
+        if (pisSpan) pisSpan.textContent = textVal || '0';
     }
 
     elements.giftOpenInputs.forEach(input => {
         const val = state.giftOpenCount[input.getAttribute('data-value')];
-        const textVal = (val === null) ? '' : formatNumber(val);
+        const textVal = (val === null || val === undefined || isNaN(val)) ? '' : formatNumber(val);
         input.value = textVal;
         const span = input.nextElementSibling;
         if (span && span.classList.contains('monthly-text')) span.textContent = textVal;
     });
     elements.giftOutInputs.forEach(input => {
         const val = state.giftOutCount[input.getAttribute('data-value')];
-        const textVal = (val === null) ? '' : formatNumber(val);
+        const textVal = (val === null || val === undefined || isNaN(val)) ? '' : formatNumber(val);
         input.value = textVal;
         const span = input.nextElementSibling;
         if (span && span.classList.contains('monthly-text')) span.textContent = textVal;
     });
     elements.giftCloseInputs.forEach(input => {
         const val = state.giftCloseCount[input.getAttribute('data-value')];
-        const textVal = (val === null) ? '' : formatNumber(val);
+        const textVal = (val === null || val === undefined || isNaN(val)) ? '' : formatNumber(val);
         input.value = textVal;
         const span = input.nextElementSibling;
         if (span && span.classList.contains('monthly-text')) span.textContent = textVal;
