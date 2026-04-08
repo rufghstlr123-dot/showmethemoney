@@ -175,50 +175,52 @@ async function saveData(doLock = false) {
         updateUIOnly(); 
         
         try {
-            // Wait a bit longer to ensure all CSS transitions and renders are finished
-            await new Promise(r => setTimeout(r, 500));
+            // Briefly wait for browser to render styled backgrounds
+            await new Promise(r => setTimeout(r, 400));
             
+            // Overhaul: Target the container of panels specifically and force vertical stack
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 3, // 3x scale is ideal for ultra-sharp text in PNG
+                scale: 2, 
                 logging: false,
                 useCORS: true,
                 backgroundColor: '#ffffff',
-                scrollX: 0,
-                scrollY: 0,
                 onclone: (clonedDoc) => {
                     const clonedMain = clonedDoc.getElementById('main-content-area');
                     if (clonedMain) {
-                        // Force a compact desktop width for the capture
-                        clonedMain.style.width = '1200px';
-                        clonedMain.style.padding = '30px';
-                        clonedMain.style.margin = '0';
-                        clonedMain.style.minHeight = 'auto';
+                        clonedMain.style.width = '900px'; // Narrower for vertical readability
+                        clonedMain.style.padding = '20px';
                         
-                        // Ensure the Grid is rendered as a clean horizontal layout for the report
-                        const grid = clonedMain.querySelector('.content-grid');
-                        if (grid) {
-                            grid.style.display = 'flex';
-                            grid.style.flexDirection = 'row';
-                            grid.style.justifyContent = 'space-between';
-                            grid.style.gap = '20px';
-                            grid.style.width = '100%';
-                            
-                            // Make each panel effectively 1/3 width
-                            grid.querySelectorAll('.panel').forEach(p => {
-                                p.style.flex = '1';
-                                p.style.minWidth = '0';
-                                p.style.display = 'block';
-                                p.style.visibility = 'visible';
-                                p.style.opacity = '1';
-                            });
+                        // DESTRUCTIVE FIX: Force every panel to be a block and visible
+                        const panels = clonedMain.querySelectorAll('.panel');
+                        const contentGrid = clonedMain.querySelector('.content-grid');
+                        
+                        if (contentGrid) {
+                            contentGrid.style.display = 'block'; // Disable Grid
+                            contentGrid.style.width = '100%';
+                        }
+                        
+                        panels.forEach(p => {
+                            p.style.display = 'block';
+                            p.style.marginBottom = '30px';
+                            p.style.width = '100%';
+                            p.style.height = 'auto';
+                            p.style.visibility = 'visible';
+                            p.style.opacity = '1';
+                        });
+
+                        // Ensure Result Dashboard is also visible and at the bottom
+                        const dashboard = clonedMain.querySelector('.result-dashboard');
+                        if (dashboard) {
+                            dashboard.style.display = 'block';
+                            dashboard.style.marginTop = '40px';
                         }
                     }
                 }
             });
-            // PNG for crystal clear text
             screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
-            console.error("Screenshot Error:", e);
+            console.error("Critical Screenshot Error:", e);
+            // Non-blocking: continue even if screenshot fails
         }
     }
 
@@ -848,7 +850,7 @@ function setupEventListeners() {
     }
 
     if (elements.btnSaveAll) {
-        elements.btnSaveAll.addEventListener('click', () => {
+        elements.btnSaveAll.addEventListener('click', async () => {
             const isAdmin = state.userMode === 'admin';
             const isLocked = state.isLocked;
 
@@ -856,7 +858,7 @@ function setupEventListeners() {
                 if (isAdmin) {
                     if (confirm('해당 일자의 마감을 취소하시겠습니까?\n취소 후에는 게스트를 포함한 모든 사용자가 데이터를 수정할 수 있습니다.')) {
                         state.isLocked = false;
-                        saveData(); // Set lock flag to false implicitly
+                        await saveData(); 
                         alert('일 마감이 취소되었습니다.');
                         loadData();
                         renderDate();
@@ -867,7 +869,7 @@ function setupEventListeners() {
             }
 
             if (confirm('일 마감을 완료하시겠습니까?\n마감 후에는 게스트 모드에서 수정할 수 없습니다.')) {
-                saveData(true);
+                await saveData(true);
                 alert('일 마감이 완료되었습니다.');
                 loadData();
                 renderDate();
