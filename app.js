@@ -180,46 +180,46 @@ async function saveData(doLock = false) {
             
             // Overhaul: Target the container of panels specifically and force vertical stack
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 2.5, // 2.5x is the sweet spot for file size vs clarity
+                scale: 2.5, 
                 logging: false,
                 useCORS: true,
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
                 onclone: (clonedDoc) => {
-                    // Force the capture area to a controlled, professional width
                     const clonedMain = clonedDoc.getElementById('main-content-area');
                     if (clonedMain) {
-                        clonedMain.style.width = '1300px'; 
-                        clonedMain.style.padding = '40px';
-                        clonedMain.style.margin = '0 auto';
-                        clonedMain.style.boxShadow = 'none';
-                        clonedMain.style.backgroundColor = '#f8fafc';
+                        // Force layout to be stable and narrow for the screenshot
+                        clonedMain.style.width = '1200px'; 
+                        clonedMain.style.padding = '30px';
+                        clonedMain.style.margin = '0';
+                        clonedMain.style.height = 'auto';
+                        clonedMain.style.backgroundColor = '#ffffff';
 
-                        // Critical: Fix the Grid columns that html2canvas often fails to compute
-                        const grid = clonedMain.querySelector('.content-grid');
-                        if (grid) {
-                            grid.style.display = 'flex';
-                            grid.style.flexDirection = 'row';
-                            grid.style.justifyContent = 'center';
-                            grid.style.gap = '24px';
-                            grid.style.width = '100%';
-                            
-                            // Ensure each panel has a defined width and is visible
-                            grid.querySelectorAll('.panel').forEach(p => {
-                                p.style.flex = '0 0 380px'; // Fixed size panels to prevent "stretching"
-                                p.style.display = 'block';
-                                p.style.visibility = 'visible';
-                                p.style.opacity = '1';
-                                p.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)'; // Prettier for snapshot
-                            });
+                        // DESTRUCTIVE FIX FOR HTML2CANVAS GRID ISSUES:
+                        // Convert everything to simple blocks to avoid panel disappearance
+                        const contentGrid = clonedMain.querySelector('.content-grid');
+                        if (contentGrid) {
+                            contentGrid.style.display = 'block'; // Disable Grid
+                            contentGrid.style.width = '100%';
                         }
 
-                        // Ensure bottom dashboard is also contained well
+                        clonedMain.querySelectorAll('.panel').forEach(p => {
+                            p.style.display = 'block';
+                            p.style.width = '100%';
+                            p.style.marginBottom = '25px';
+                            p.style.position = 'static';
+                            p.style.visibility = 'visible';
+                            p.style.opacity = '1';
+                        });
+
+                        // Ensure dashboard at bottom is visible
                         const dashboard = clonedMain.querySelector('.result-dashboard');
                         if (dashboard) {
-                            dashboard.style.display = 'flex';
-                            dashboard.style.gap = '20px';
-                            dashboard.style.marginTop = '30px';
-                            dashboard.querySelectorAll('.result-item').forEach(i => i.style.flex = '1');
+                            dashboard.style.display = 'block';
+                            dashboard.style.width = '100%';
+                            dashboard.querySelectorAll('.result-item').forEach(i => {
+                                i.style.display = 'block';
+                                i.style.marginBottom = '10px';
+                            });
                         }
                     }
                 }
