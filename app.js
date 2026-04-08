@@ -153,23 +153,7 @@ async function saveData(doLock = false) {
 
     if (doLock) state.isLocked = true;
     
-    let screenshot = null;
-    if (doLock) {
-        try {
-            // Take screenshot of main content area
-            const canvas = await html2canvas(elements.mainContent, {
-                scale: 2.5, // High resolution
-                logging: false,
-                useCORS: true,
-                backgroundColor: '#f8fafc',
-                windowWidth: 1400 // Ensure consistent layout (avoid wide screen tiny text)
-            });
-            screenshot = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
-        } catch (e) {
-            console.error("Screenshot Error:", e);
-        }
-    }
-
+    // Update local state arrays before potential screenshot
     elements.giftOpenInputs.forEach(input => {
         state.giftOpenCount[input.getAttribute('data-value')] = input.value === '' ? null : parseNumber(input.value);
     });
@@ -182,9 +166,31 @@ async function saveData(doLock = false) {
     elements.cashInputs.forEach(input => {
         state.cashCount[input.getAttribute('data-value')] = input.value === '' ? null : parseNumber(input.value);
     });
-
     state.pisAmount = elements.finalBook.value === '' ? null : parseNumber(elements.finalBook.value);
     state.author = elements.inputAuthor ? elements.inputAuthor.value : '';
+
+    let screenshot = null;
+    if (doLock) {
+        // Apply "Locked" visuals (red/orange backgrounds) before taking screenshot
+        updateUIOnly(); 
+        
+        try {
+            // Briefly wait for browsers to complete rendering the style change
+            await new Promise(r => setTimeout(r, 100));
+            
+            const canvas = await html2canvas(elements.mainContent, {
+                scale: 2.5, 
+                logging: false,
+                useCORS: true,
+                backgroundColor: '#f8fafc',
+                windowWidth: 1400 
+            });
+            screenshot = canvas.toDataURL('image/jpeg', 0.8);
+        } catch (e) {
+            console.error("Screenshot Error:", e);
+        }
+    }
+
 
     const path = getDatePath(state.currentDate);
     const dataToSave = {
