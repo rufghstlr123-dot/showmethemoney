@@ -74,11 +74,9 @@ const elements = {
     btnAdminLogout: document.getElementById('btn-admin-logout'),
     monthlyDiscrepancyPanel: document.getElementById('monthly-discrepancy-panel'),
     monthlyDiscrepancyList: document.getElementById('monthly-discrepancy-list'),
-    btnShowHistory: document.getElementById('btn-show-history'),
-    historyModal: document.getElementById('history-modal'),
-    historyOverlay: document.getElementById('history-overlay'),
-    historyList: document.getElementById('history-list'),
-    btnCloseHistory: document.getElementById('btn-close-history'),
+    navHistory: document.getElementById('nav-history'),
+    historyList: document.getElementById('history-tab-list'),
+    historyViewArea: document.getElementById('history-view'),
 };
 
 // Helpers for Number Formatting
@@ -428,9 +426,22 @@ function applyLockVisuals() {
 
     if (elements.navMonthly) elements.navMonthly.style.display = isAdmin ? 'block' : 'none';
     if (elements.navWeekly) elements.navWeekly.style.display = isAdmin ? 'block' : 'none';
-    if (elements.monthlyDiscrepancyList) elements.monthlyDiscrepancyList.style.display = (isMonthly || isWeekly) ? 'contents' : 'none';
+    if (elements.navHistory) elements.navHistory.style.display = isAdmin ? 'block' : 'none';
 
-    document.body.classList.toggle('monthly-mode', isMonthly || isWeekly);
+    if (elements.monthlyDiscrepancyList) elements.monthlyDiscrepancyList.style.display = (state.viewMode === 'monthly' || state.viewMode === 'weekly') ? 'contents' : 'none';
+
+    const isHistory = state.viewMode === 'history';
+    if (elements.historyViewArea) elements.historyViewArea.style.display = isHistory ? 'block' : 'none';
+    
+    // Hide standard grid and dashboard in history mode
+    const contentGrid = document.querySelector('.content-grid');
+    const resultDashboard = document.querySelector('.result-dashboard');
+    const resultNote = document.querySelector('.result-note');
+    if (contentGrid) contentGrid.style.display = isHistory ? 'none' : 'grid';
+    if (resultDashboard) resultDashboard.style.display = isHistory ? 'none' : 'grid';
+    if (resultNote) resultNote.style.display = isHistory ? 'none' : 'block';
+
+    document.body.classList.toggle('monthly-mode', isMonthly || isWeekly || isHistory);
 }
 
 
@@ -534,7 +545,6 @@ async function openHistory() {
     const dateStr = `${y}-${m}-${d}`;
     
     elements.historyList.innerHTML = '<div class="empty-msg">기록을 불러오는 중...</div>';
-    elements.historyModal.classList.add('active');
 
     try {
         const historyRef = ref(db, `closing_v2/history/${dateStr}`);
@@ -543,7 +553,7 @@ async function openHistory() {
 
         elements.historyList.innerHTML = '';
         if (!historyData) {
-            elements.historyList.innerHTML = '<div class="empty-msg">저장된 백업 기록이 없습니다.</div>';
+            elements.historyList.innerHTML = '<div class="empty-msg">해당 일자의 백업 기록이 없습니다.</div>';
             return;
         }
 
@@ -574,7 +584,7 @@ async function openHistory() {
 }
 
 function closeHistory() {
-    elements.historyModal.classList.remove('active');
+    // No longer needed for tab view
 }
 
 async function restoreHistory(data, timeStr) {
@@ -768,6 +778,7 @@ function setupEventListeners() {
             elements.navDaily.classList.add('active');
             if (elements.navMonthly) elements.navMonthly.classList.remove('active');
             if (elements.navWeekly) elements.navWeekly.classList.remove('active');
+            if (elements.navHistory) elements.navHistory.classList.remove('active');
             loadData();
             renderDate();
             calculateTotals();
@@ -781,8 +792,8 @@ function setupEventListeners() {
             state.viewMode = 'monthly';
             elements.navMonthly.classList.add('active');
             elements.navDaily.classList.remove('active');
-            elements.navMonthly.classList.add('active');
             if (elements.navWeekly) elements.navWeekly.classList.remove('active');
+            if (elements.navHistory) elements.navHistory.classList.remove('active');
             loadData();
             renderDate();
             calculateTotals();
@@ -797,21 +808,36 @@ function setupEventListeners() {
             elements.navWeekly.classList.add('active');
             elements.navDaily.classList.remove('active');
             if (elements.navMonthly) elements.navMonthly.classList.remove('active');
+            if (elements.navHistory) elements.navHistory.classList.remove('active');
             loadData();
             renderDate();
             calculateTotals();
         });
     }
 
+    if (elements.navHistory) {
+        elements.navHistory.addEventListener('click', () => {
+            if (state.viewMode === 'history') return;
+            saveData();
+            state.viewMode = 'history';
+            elements.navHistory.classList.add('active');
+            elements.navDaily.classList.remove('active');
+            if (elements.navMonthly) elements.navMonthly.classList.remove('active');
+            if (elements.navWeekly) elements.navWeekly.classList.remove('active');
+            openHistory();
+            renderDate();
+        });
+    }
+
     if (elements.calendarTrigger) elements.calendarTrigger.addEventListener('click', openCalendar);
     if (elements.calendarOverlay) elements.calendarOverlay.addEventListener('click', closeCalendar);
-    if (elements.calBtnPrev) elements.calBtnPrev.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); });
-    if (elements.calBtnNext) elements.calBtnNext.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); });
+    if (elements.calBtnPrev) elements.calBtnPrev.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); if (state.viewMode === 'history') openHistory(); });
+    if (elements.calBtnNext) elements.calBtnNext.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); if (state.viewMode === 'history') openHistory(); });
 
     // History Event Listeners
-    if (elements.btnShowHistory) elements.btnShowHistory.addEventListener('click', openHistory);
-    if (elements.historyOverlay) elements.historyOverlay.addEventListener('click', closeHistory);
-    if (elements.btnCloseHistory) elements.btnCloseHistory.addEventListener('click', closeHistory);
+    // if (elements.btnShowHistory) elements.btnShowHistory.addEventListener('click', openHistory);
+    // if (elements.historyOverlay) elements.historyOverlay.addEventListener('click', closeHistory);
+    // if (elements.btnCloseHistory) elements.btnCloseHistory.addEventListener('click', closeHistory);
 }
 
 init();
