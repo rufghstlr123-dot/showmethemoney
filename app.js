@@ -176,16 +176,24 @@ async function saveData(doLock = false) {
         
         try {
             // Briefly wait for browsers to complete rendering the style change
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 300));
             
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 2.5, 
+                scale: 2, // 2x resolution is plenty for PNG
                 logging: false,
                 useCORS: true,
                 backgroundColor: '#f8fafc',
-                windowWidth: 1400 
+                onclone: (clonedDoc) => {
+                    const clonedMain = clonedDoc.getElementById('main-content-area');
+                    if (clonedMain) {
+                        clonedMain.style.width = '1400px';
+                        clonedMain.style.padding = '40px';
+                        clonedMain.style.backgroundColor = '#f8fafc';
+                    }
+                }
             });
-            screenshot = canvas.toDataURL('image/jpeg', 0.8);
+            // Switch to PNG for lossless text clarity
+            screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
             console.error("Screenshot Error:", e);
         }
