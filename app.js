@@ -175,24 +175,47 @@ async function saveData(doLock = false) {
         updateUIOnly(); 
         
         try {
-            // Briefly wait for browsers to complete rendering the style change
-            await new Promise(r => setTimeout(r, 300));
+            // Wait a bit longer to ensure all CSS transitions and renders are finished
+            await new Promise(r => setTimeout(r, 500));
             
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 2, // 2x resolution is plenty for PNG
+                scale: 3, // 3x scale is ideal for ultra-sharp text in PNG
                 logging: false,
                 useCORS: true,
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#ffffff',
+                scrollX: 0,
+                scrollY: 0,
                 onclone: (clonedDoc) => {
                     const clonedMain = clonedDoc.getElementById('main-content-area');
                     if (clonedMain) {
-                        clonedMain.style.width = '1400px';
-                        clonedMain.style.padding = '40px';
-                        clonedMain.style.backgroundColor = '#f8fafc';
+                        // Force a compact desktop width for the capture
+                        clonedMain.style.width = '1200px';
+                        clonedMain.style.padding = '30px';
+                        clonedMain.style.margin = '0';
+                        clonedMain.style.minHeight = 'auto';
+                        
+                        // Ensure the Grid is rendered as a clean horizontal layout for the report
+                        const grid = clonedMain.querySelector('.content-grid');
+                        if (grid) {
+                            grid.style.display = 'flex';
+                            grid.style.flexDirection = 'row';
+                            grid.style.justifyContent = 'space-between';
+                            grid.style.gap = '20px';
+                            grid.style.width = '100%';
+                            
+                            // Make each panel effectively 1/3 width
+                            grid.querySelectorAll('.panel').forEach(p => {
+                                p.style.flex = '1';
+                                p.style.minWidth = '0';
+                                p.style.display = 'block';
+                                p.style.visibility = 'visible';
+                                p.style.opacity = '1';
+                            });
+                        }
                     }
                 }
             });
-            // Switch to PNG for lossless text clarity
+            // PNG for crystal clear text
             screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
             console.error("Screenshot Error:", e);
