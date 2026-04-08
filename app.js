@@ -180,42 +180,10 @@ async function saveData(doLock = false) {
             
             // Overhaul: Target the container of panels specifically and force vertical stack
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 2, 
+                scale: 3, // Keep high resolution for text clarity
                 logging: false,
                 useCORS: true,
-                backgroundColor: '#ffffff',
-                onclone: (clonedDoc) => {
-                    const clonedMain = clonedDoc.getElementById('main-content-area');
-                    if (clonedMain) {
-                        clonedMain.style.width = '900px'; // Narrower for vertical readability
-                        clonedMain.style.padding = '20px';
-                        
-                        // DESTRUCTIVE FIX: Force every panel to be a block and visible
-                        const panels = clonedMain.querySelectorAll('.panel');
-                        const contentGrid = clonedMain.querySelector('.content-grid');
-                        
-                        if (contentGrid) {
-                            contentGrid.style.display = 'block'; // Disable Grid
-                            contentGrid.style.width = '100%';
-                        }
-                        
-                        panels.forEach(p => {
-                            p.style.display = 'block';
-                            p.style.marginBottom = '30px';
-                            p.style.width = '100%';
-                            p.style.height = 'auto';
-                            p.style.visibility = 'visible';
-                            p.style.opacity = '1';
-                        });
-
-                        // Ensure Result Dashboard is also visible and at the bottom
-                        const dashboard = clonedMain.querySelector('.result-dashboard');
-                        if (dashboard) {
-                            dashboard.style.display = 'block';
-                            dashboard.style.marginTop = '40px';
-                        }
-                    }
-                }
+                backgroundColor: '#ffffff'
             });
             screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
