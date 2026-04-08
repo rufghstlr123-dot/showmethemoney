@@ -348,7 +348,7 @@ function processAggregation(allData, mode, startStr, endStr) {
         const dSystemTotal = dOpenTotal + dOutTotal - (dData.pisAmount || 0);
         const dDiff = dCloseTotal - dSystemTotal;
         if (dDiff !== 0) {
-            dailyDiscrepancies.push({ l: mode === 'monthly' ? `${day}일` : `${month}/${day}`, diff: dDiff });
+            dailyDiscrepancies.push({ l: `${parseInt(month)}월 ${parseInt(day)}일`, diff: dDiff });
         }
     });
 
