@@ -956,6 +956,19 @@ hr {
 }
 
 
+.history-view {
+    display: none;
+}
+
+body.history-mode .history-view {
+    display: block !important;
+}
+
+body.history-mode .content-grid,
+body.history-mode .result-dashboard,
+body.history-mode .result-note {
+    display: none !important;
+}
 /* History Modal Styling */
 #history-modal {
     display: none;

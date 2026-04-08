@@ -431,17 +431,8 @@ function applyLockVisuals() {
     if (elements.monthlyDiscrepancyList) elements.monthlyDiscrepancyList.style.display = (state.viewMode === 'monthly' || state.viewMode === 'weekly') ? 'contents' : 'none';
 
     const isHistory = state.viewMode === 'history';
-    if (elements.historyViewArea) elements.historyViewArea.style.display = isHistory ? 'block' : 'none';
-    
-    // Hide standard grid and dashboard in history mode
-    const contentGrid = document.querySelector('.content-grid');
-    const resultDashboard = document.querySelector('.result-dashboard');
-    const resultNote = document.querySelector('.result-note');
-    if (contentGrid) contentGrid.style.display = isHistory ? 'none' : 'grid';
-    if (resultDashboard) resultDashboard.style.display = isHistory ? 'none' : 'grid';
-    if (resultNote) resultNote.style.display = isHistory ? 'none' : 'block';
-
-    document.body.classList.toggle('monthly-mode', isMonthly || isWeekly || isHistory);
+    document.body.classList.toggle('monthly-mode', isMonthly || isWeekly);
+    document.body.classList.toggle('history-mode', isHistory);
 }
 
 
@@ -678,6 +669,11 @@ function setupEventListeners() {
             const { start } = getMonthWeekRange(state.currentDate);
             state.currentDate = new Date(start);
             state.currentDate.setDate(state.currentDate.getDate() - 1);
+        } else if (state.viewMode === 'history') {
+            state.currentDate.setDate(state.currentDate.getDate() - 1);
+            openHistory();
+            updateUIOnly();
+            return;
         } else {
             state.currentDate.setDate(state.currentDate.getDate() - 1);
         }
@@ -694,6 +690,11 @@ function setupEventListeners() {
             const { end } = getMonthWeekRange(state.currentDate);
             state.currentDate = new Date(end);
             state.currentDate.setDate(state.currentDate.getDate() + 1);
+        } else if (state.viewMode === 'history') {
+            state.currentDate.setDate(state.currentDate.getDate() + 1);
+            openHistory();
+            updateUIOnly();
+            return;
         } else {
             state.currentDate.setDate(state.currentDate.getDate() + 1);
         }
@@ -825,7 +826,7 @@ function setupEventListeners() {
             if (elements.navMonthly) elements.navMonthly.classList.remove('active');
             if (elements.navWeekly) elements.navWeekly.classList.remove('active');
             openHistory();
-            renderDate();
+            updateUIOnly();
         });
     }
 
