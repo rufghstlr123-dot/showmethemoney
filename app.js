@@ -74,6 +74,11 @@ const elements = {
     btnAdminLogout: document.getElementById('btn-admin-logout'),
     monthlyDiscrepancyPanel: document.getElementById('monthly-discrepancy-panel'),
     monthlyDiscrepancyList: document.getElementById('monthly-discrepancy-list'),
+    btnShowHistory: document.getElementById('btn-show-history'),
+    historyModal: document.getElementById('history-modal'),
+    historyOverlay: document.getElementById('history-overlay'),
+    historyList: document.getElementById('history-list'),
+    btnCloseHistory: document.getElementById('btn-close-history'),
 };
 
 // Helpers for Number Formatting
@@ -129,6 +134,14 @@ function init() {
     return `closing_v2/daily/${y}-${m}-${d}`;
 }
 
+function getHistoryPath(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const timestamp = new Date().getTime();
+    return `closing_v2/history/${y}-${m}-${d}/${timestamp}`;
+}
+
 async function saveData(doLock = false) {
     if (state.viewMode !== 'daily') return;
     
@@ -167,6 +180,12 @@ async function saveData(doLock = false) {
 
     try {
         await set(ref(db, path), dataToSave);
+        
+        // Save history snapshot if it's a lock action or contains actual content
+        const hasContent = state.pisAmount !== null || state.author !== '' || Object.values(state.giftOpenCount).some(v => v !== null);
+        if (doLock || (hasContent && Math.random() < 0.1)) { // random 10% chance for regular saves to avoid bloat, or 100% on lock
+             await set(ref(db, getHistoryPath(state.currentDate)), dataToSave);
+        }
     } catch (err) {
         console.error("Firebase Save Error:", err);
     }
@@ -507,6 +526,75 @@ function closeCalendar() {
     elements.calendarModal.classList.remove('active');
 }
 
+// History Logic
+async function openHistory() {
+    const y = state.currentDate.getFullYear();
+    const m = String(state.currentDate.getMonth() + 1).padStart(2, '0');
+    const d = String(state.currentDate.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    
+    elements.historyList.innerHTML = '<div class="empty-msg">기록을 불러오는 중...</div>';
+    elements.historyModal.classList.add('active');
+
+    try {
+        const historyRef = ref(db, `closing_v2/history/${dateStr}`);
+        const snapshot = await get(historyRef);
+        const historyData = snapshot.val();
+
+        elements.historyList.innerHTML = '';
+        if (!historyData) {
+            elements.historyList.innerHTML = '<div class="empty-msg">저장된 백업 기록이 없습니다.</div>';
+            return;
+        }
+
+        // Display in reverse chronological order
+        const timestamps = Object.keys(historyData).sort((a, b) => b - a);
+        timestamps.forEach(ts => {
+            const data = historyData[ts];
+            const dateObj = new Date(Number(ts));
+            const timeStr = dateObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <div class="history-info">
+                    <span class="history-time">${timeStr} 스냅샷</span>
+                    <span class="history-author">작성자: ${data.author || '미지정'}</span>
+                </div>
+                <button class="btn-restore" data-ts="${ts}">복원하기</button>
+            `;
+            
+            item.querySelector('.btn-restore').onclick = () => restoreHistory(data, timeStr);
+            elements.historyList.appendChild(item);
+        });
+    } catch (err) {
+        console.error("History Load Error:", err);
+        elements.historyList.innerHTML = '<div class="empty-msg">기록을 불러오는 중 오류가 발생했습니다.</div>';
+    }
+}
+
+function closeHistory() {
+    elements.historyModal.classList.remove('active');
+}
+
+async function restoreHistory(data, timeStr) {
+    if (!confirm(`${timeStr} 시점의 데이터로 복원하시겠습니까?\n현재 입력된 데이터는 덮어씌워집니다.`)) return;
+    
+    // Update state with historical data
+    state.pisAmount = (data.pisAmount !== undefined) ? data.pisAmount : null;
+    state.author = data.author || '';
+    state.isLocked = data.isLocked || false;
+    state.giftOpenCount = data.giftOpen || { 5000: null, 10000: null, 50000: null };
+    state.giftOutCount = data.giftOut || { 5000: null, 10000: null, 50000: null };
+    state.giftCloseCount = data.giftClose || { 5000: null, 10000: null, 50000: null };
+    state.cashCount = data.cash || { 50000: null, 10000: null, 5000: null, 1000: null, 500: null, 100: null, 50: null, 10: null };
+    
+    updateUIOnly();
+    await saveData(); // Save the restored state as the current state
+    alert(`${timeStr} 데이터로 복원되었습니다.`);
+    closeHistory();
+}
+
 function renderCalendar() {
     const year = calViewDate.getFullYear();
     const month = calViewDate.getMonth();
@@ -719,6 +807,11 @@ function setupEventListeners() {
     if (elements.calendarOverlay) elements.calendarOverlay.addEventListener('click', closeCalendar);
     if (elements.calBtnPrev) elements.calBtnPrev.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); });
     if (elements.calBtnNext) elements.calBtnNext.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); });
+
+    // History Event Listeners
+    if (elements.btnShowHistory) elements.btnShowHistory.addEventListener('click', openHistory);
+    if (elements.historyOverlay) elements.historyOverlay.addEventListener('click', closeHistory);
+    if (elements.btnCloseHistory) elements.btnCloseHistory.addEventListener('click', closeHistory);
 }
 
 init();
