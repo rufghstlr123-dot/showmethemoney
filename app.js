@@ -180,59 +180,26 @@ async function saveData(doLock = false) {
             
             // Overhaul: Target the container of panels specifically and force vertical stack
             const canvas = await (async () => {
-                // Shadow Capture Method: Create a real but hidden clone in the DOM
-                const tempContainer = document.createElement('div');
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.left = '-9999px';
-                tempContainer.style.top = '0';
-                tempContainer.style.width = '1200px'; // Fixed width for consistent layout
-                tempContainer.style.backgroundColor = '#f8fafc';
-                document.body.appendChild(tempContainer);
-
-                // Clone the actual content into our hidden container
-                const clone = elements.mainContent.cloneNode(true);
-                tempContainer.appendChild(clone);
-
-                // Force clear styling on the clone for high-readability
-                clone.style.width = '1200px';
-                clone.style.padding = '40px';
+                // Stealth Mode: Temporarily style the live DOM for the screenshot
+                document.body.classList.add('is-taking-screenshot');
                 
-                const grid = clone.querySelector('.content-grid');
-                if (grid) {
-                    grid.style.display = 'block'; // Block layout is 100% stable in html2canvas
-                    grid.style.width = '100%';
+                try {
+                    // Wait briefly for the browser to apply the CSS specifically for the snapshot
+                    await new Promise(r => setTimeout(r, 200));
+                    
+                    const c = await html2canvas(elements.mainContent, {
+                        scale: 2.5, 
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        scrollX: 0,
+                        scrollY: 0
+                    });
+                    return c;
+                } finally {
+                    // Always revert the UI immediately
+                    document.body.classList.remove('is-taking-screenshot');
                 }
-                
-                const panels = clone.querySelectorAll('.panel');
-                panels.forEach(p => {
-                    p.style.display = 'block';
-                    p.style.width = '100%';
-                    p.style.marginBottom = '30px';
-                    p.style.backgroundColor = '#ffffff';
-                    p.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
-                    p.style.visibility = 'visible';
-                    p.style.opacity = '1';
-                });
-
-                // Ensure all input values are preserved in clone (cloning doesn't preserve current input values)
-                const sourceInputs = elements.mainContent.querySelectorAll('input');
-                const cloneInputs = clone.querySelectorAll('input');
-                sourceInputs.forEach((src, idx) => {
-                    if (cloneInputs[idx]) {
-                        cloneInputs[idx].value = src.value;
-                        cloneInputs[idx].style.backgroundColor = src.style.backgroundColor;
-                    }
-                });
-
-                const c = await html2canvas(tempContainer, {
-                    scale: 2.5,
-                    useCORS: true,
-                    backgroundColor: '#f8fafc',
-                    logging: false
-                });
-
-                document.body.removeChild(tempContainer);
-                return c;
             })();
 
             screenshot = canvas.toDataURL('image/png'); 

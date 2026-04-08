@@ -1152,3 +1152,51 @@ body.history-mode .result-note {
     align-items: center;
 }
 
+/* Snapshot Stealth Mode - Forces perfect layout for html2canvas */
+body.is-taking-screenshot .app-container {
+    display: block !important;
+    width: 1200px !important;
+    height: auto !important;
+}
+
+body.is-taking-screenshot .sidebar {
+    display: none !important;
+}
+
+body.is-taking-screenshot .main-content {
+    width: 1200px !important;
+    padding: 30px !important;
+    transform: none !important;
+}
+
+body.is-taking-screenshot .main-header {
+    width: 100% !important;
+    position: static !important;
+    margin-bottom: 20px !important;
+}
+
+body.is-taking-screenshot .content-grid {
+    display: block !important; /* Killer fix for missing panels */
+    width: 100% !important;
+}
+
+body.is-taking-screenshot .panel {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 25px !important;
+    page-break-inside: avoid;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+}
+
+body.is-taking-screenshot .result-dashboard {
+    display: block !important;
+    width: 100% !important;
+}
+
+body.is-taking-screenshot .result-item {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+}
