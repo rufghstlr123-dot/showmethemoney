@@ -179,51 +179,62 @@ async function saveData(doLock = false) {
             await new Promise(r => setTimeout(r, 400));
             
             // Overhaul: Target the container of panels specifically and force vertical stack
-            const canvas = await html2canvas(elements.mainContent, {
-                scale: 2.5, 
-                logging: false,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                onclone: (clonedDoc) => {
-                    const clonedMain = clonedDoc.getElementById('main-content-area');
-                    if (clonedMain) {
-                        // Force layout to be stable and narrow for the screenshot
-                        clonedMain.style.width = '1200px'; 
-                        clonedMain.style.padding = '30px';
-                        clonedMain.style.margin = '0';
-                        clonedMain.style.height = 'auto';
-                        clonedMain.style.backgroundColor = '#ffffff';
+            const canvas = await (async () => {
+                // Shadow Capture Method: Create a real but hidden clone in the DOM
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '0';
+                tempContainer.style.width = '1200px'; // Fixed width for consistent layout
+                tempContainer.style.backgroundColor = '#f8fafc';
+                document.body.appendChild(tempContainer);
 
-                        // DESTRUCTIVE FIX FOR HTML2CANVAS GRID ISSUES:
-                        // Convert everything to simple blocks to avoid panel disappearance
-                        const contentGrid = clonedMain.querySelector('.content-grid');
-                        if (contentGrid) {
-                            contentGrid.style.display = 'block'; // Disable Grid
-                            contentGrid.style.width = '100%';
-                        }
+                // Clone the actual content into our hidden container
+                const clone = elements.mainContent.cloneNode(true);
+                tempContainer.appendChild(clone);
 
-                        clonedMain.querySelectorAll('.panel').forEach(p => {
-                            p.style.display = 'block';
-                            p.style.width = '100%';
-                            p.style.marginBottom = '25px';
-                            p.style.position = 'static';
-                            p.style.visibility = 'visible';
-                            p.style.opacity = '1';
-                        });
-
-                        // Ensure dashboard at bottom is visible
-                        const dashboard = clonedMain.querySelector('.result-dashboard');
-                        if (dashboard) {
-                            dashboard.style.display = 'block';
-                            dashboard.style.width = '100%';
-                            dashboard.querySelectorAll('.result-item').forEach(i => {
-                                i.style.display = 'block';
-                                i.style.marginBottom = '10px';
-                            });
-                        }
-                    }
+                // Force clear styling on the clone for high-readability
+                clone.style.width = '1200px';
+                clone.style.padding = '40px';
+                
+                const grid = clone.querySelector('.content-grid');
+                if (grid) {
+                    grid.style.display = 'block'; // Block layout is 100% stable in html2canvas
+                    grid.style.width = '100%';
                 }
-            });
+                
+                const panels = clone.querySelectorAll('.panel');
+                panels.forEach(p => {
+                    p.style.display = 'block';
+                    p.style.width = '100%';
+                    p.style.marginBottom = '30px';
+                    p.style.backgroundColor = '#ffffff';
+                    p.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    p.style.visibility = 'visible';
+                    p.style.opacity = '1';
+                });
+
+                // Ensure all input values are preserved in clone (cloning doesn't preserve current input values)
+                const sourceInputs = elements.mainContent.querySelectorAll('input');
+                const cloneInputs = clone.querySelectorAll('input');
+                sourceInputs.forEach((src, idx) => {
+                    if (cloneInputs[idx]) {
+                        cloneInputs[idx].value = src.value;
+                        cloneInputs[idx].style.backgroundColor = src.style.backgroundColor;
+                    }
+                });
+
+                const c = await html2canvas(tempContainer, {
+                    scale: 2.5,
+                    useCORS: true,
+                    backgroundColor: '#f8fafc',
+                    logging: false
+                });
+
+                document.body.removeChild(tempContainer);
+                return c;
+            })();
+
             screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
             console.error("Critical Screenshot Error:", e);
