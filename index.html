@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -283,6 +284,23 @@
             </div>
             <div class="history-list" id="history-list">
                 <!-- History items will be injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="image-modal" class="modal">
+        <div class="modal-overlay" id="image-overlay"></div>
+        <div class="modal-content image-content">
+            <div class="modal-header">
+                <h3>백업 이미지 미리보기</h3>
+                <button class="btn-close" id="btn-close-image">×</button>
+            </div>
+            <div class="image-preview-container">
+                <img id="history-preview-img" src="" alt="Backup Preview">
+            </div>
+            <div class="modal-footer">
+                 <button id="btn-image-restore" class="btn btn-primary">이 시점으로 복원하기</button>
             </div>
         </div>
     </div>

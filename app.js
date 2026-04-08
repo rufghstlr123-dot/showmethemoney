@@ -77,6 +77,11 @@ const elements = {
     navHistory: document.getElementById('nav-history'),
     historyList: document.getElementById('history-tab-list'),
     historyViewArea: document.getElementById('history-view'),
+    imageModal: document.getElementById('image-modal'),
+    imageOverlay: document.getElementById('image-overlay'),
+    btnCloseImage: document.getElementById('btn-close-image'),
+    previewImg: document.getElementById('history-preview-img'),
+    btnImageRestore: document.getElementById('btn-image-restore'),
 };
 
 // Helpers for Number Formatting
@@ -147,6 +152,21 @@ async function saveData(doLock = false) {
     if (state.isLocked && !doLock && state.userMode !== 'admin') return;
 
     if (doLock) state.isLocked = true;
+    
+    let screenshot = null;
+    if (doLock) {
+        try {
+            // Take screenshot of main content area
+            const canvas = await html2canvas(elements.mainContent, {
+                scale: 1, // Lower scale for smaller file size
+                logging: false,
+                useCORS: true
+            });
+            screenshot = canvas.toDataURL('image/jpeg', 0.6); // 60% quality jpeg
+        } catch (e) {
+            console.error("Screenshot Error:", e);
+        }
+    }
 
     elements.giftOpenInputs.forEach(input => {
         state.giftOpenCount[input.getAttribute('data-value')] = input.value === '' ? null : parseNumber(input.value);
@@ -175,6 +195,8 @@ async function saveData(doLock = false) {
         cash: { ...state.cashCount },
         lastUpdated: new Date().getTime()
     };
+    
+    if (screenshot) dataToSave.screenshot = screenshot;
 
     try {
         await set(ref(db, path), dataToSave);
@@ -557,14 +579,26 @@ async function openHistory() {
             
             const item = document.createElement('div');
             item.className = 'history-item';
+            
+            let photoBtn = '';
+            if (data.screenshot) {
+                photoBtn = `<button class="btn-view-img" data-ts="${ts}">📸 사진 보기</button>`;
+            }
+
             item.innerHTML = `
                 <div class="history-info">
                     <span class="history-time">${timeStr} 스냅샷</span>
                     <span class="history-author">작성자: ${data.author || '미지정'}</span>
                 </div>
-                <button class="btn-restore" data-ts="${ts}">복원하기</button>
+                <div class="history-actions">
+                    ${photoBtn}
+                    <button class="btn-restore" data-ts="${ts}">🔄 복원하기</button>
+                </div>
             `;
             
+            if (data.screenshot) {
+                item.querySelector('.btn-view-img').onclick = () => openImagePreview(data, timeStr);
+            }
             item.querySelector('.btn-restore').onclick = () => restoreHistory(data, timeStr);
             elements.historyList.appendChild(item);
         });
@@ -576,6 +610,22 @@ async function openHistory() {
 
 function closeHistory() {
     // No longer needed for tab view
+}
+
+function openImagePreview(data, timeStr) {
+    if (elements.previewImg) elements.previewImg.src = data.screenshot;
+    if (elements.imageModal) elements.imageModal.classList.add('active');
+    
+    if (elements.btnImageRestore) {
+        elements.btnImageRestore.onclick = () => {
+            closeImagePreview();
+            restoreHistory(data, timeStr);
+        };
+    }
+}
+
+function closeImagePreview() {
+    if (elements.imageModal) elements.imageModal.classList.remove('active');
 }
 
 async function restoreHistory(data, timeStr) {
@@ -836,9 +886,11 @@ function setupEventListeners() {
     if (elements.calBtnNext) elements.calBtnNext.addEventListener('click', () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); if (state.viewMode === 'history') openHistory(); });
 
     // History Event Listeners
-    // if (elements.btnShowHistory) elements.btnShowHistory.addEventListener('click', openHistory);
-    // if (elements.historyOverlay) elements.historyOverlay.addEventListener('click', closeHistory);
-    // if (elements.btnCloseHistory) elements.btnCloseHistory.addEventListener('click', closeHistory);
+    if (elements.navHistory) elements.navHistory.addEventListener('click', openHistory);
+
+    // Image Preview Listeners
+    if (elements.imageOverlay) elements.imageOverlay.addEventListener('click', closeImagePreview);
+    if (elements.btnCloseImage) elements.btnCloseImage.addEventListener('click', closeImagePreview);
 }
 
 init();
