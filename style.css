@@ -1182,7 +1182,7 @@ body.is-taking-screenshot .sidebar {
 
 body.is-taking-screenshot .main-content {
     width: 1400px !important;
-    padding: 50px !important;
+    padding: 40px !important;
     background-color: #f8fafc !important;
     height: auto !important;
     overflow: visible !important;
@@ -1191,17 +1191,17 @@ body.is-taking-screenshot .main-content {
 body.is-taking-screenshot .main-header {
     width: 100% !important;
     position: static !important;
-    margin-bottom: 40px !important;
+    margin-bottom: 30px !important;
 }
 
 body.is-taking-screenshot .content-grid {
     display: flex !important;
     flex-direction: row !important;
-    align-items: stretch !important;
+    align-items: stretch !important; /* Forces equal height for all panels */
     justify-content: space-between !important;
-    gap: 24px !important;
+    gap: 20px !important;
     width: 100% !important;
-    margin-bottom: 40px !important;
+    margin-bottom: 30px !important;
 }
 
 body.is-taking-screenshot .panel {
@@ -1209,62 +1209,38 @@ body.is-taking-screenshot .panel {
     flex-direction: column !important;
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    padding: 30px !important;
+    margin-bottom: 0 !important;
+    padding: 24px !important;
     visibility: visible !important;
     opacity: 1 !important;
     background-color: #ffffff !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
-    border-radius: 20px !important;
+    border-radius: 16px !important;
 }
 
-/* Force perfect table alignment in snapshot */
-body.is-taking-screenshot .cash-table {
-    table-layout: fixed !important;
+body.is-taking-screenshot .panel > div {
     width: 100% !important;
 }
-body.is-taking-screenshot .cash-table th, 
-body.is-taking-screenshot .cash-table td {
-    font-size: 1.15rem !important;
-    padding: 18px 10px !important;
-}
-body.is-taking-screenshot .cash-table th:nth-child(1), body.is-taking-screenshot .cash-table td:nth-child(1) { width: 33% !important; }
-body.is-taking-screenshot .cash-table th:nth-child(2), body.is-taking-screenshot .cash-table td:nth-child(2) { width: 33% !important; }
-body.is-taking-screenshot .cash-table th:nth-child(3), body.is-taking-screenshot .cash-table td:nth-child(3) { width: 34% !important; }
 
 body.is-taking-screenshot .result-dashboard {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     width: 100% !important;
-    gap: 24px !important;
-    margin-top: 40px !important;
+    gap: 20px !important;
+    margin-top: 30px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 body.is-taking-screenshot .result-item {
-    padding: 30px 20px !important;
-    border-radius: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
     background-color: #ffffff !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
-    justify-content: center !important;
-    align-items: center !important;
-}
-
-body.is-taking-screenshot .result-item .label {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    color: #475569 !important;
-    margin-bottom: 15px !important;
-    display: block !important;
-}
-
-body.is-taking-screenshot .result-item .value, 
-body.is-taking-screenshot .result-item .monthly-text,
-body.is-taking-screenshot .result-item input {
-    font-size: 1.6rem !important;
-    font-weight: 800 !important;
-    color: #0f172a !important;
-    display: block !important;
 }
 
 body.is-taking-screenshot .result-item.full-width {
@@ -1272,13 +1248,15 @@ body.is-taking-screenshot .result-item.full-width {
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 35px 60px !important;
+    padding: 20px 40px !important;
 }
 
 body.is-taking-screenshot .result-note {
-    font-size: 1.1rem !important;
-    margin-top: 30px !important;
-    color: #475569 !important;
-    text-align: right !important;
     display: block !important;
+    text-align: right !important;
+    margin-top: 20px !important;
+    padding-right: 10px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    visibility: visible !important;
 }

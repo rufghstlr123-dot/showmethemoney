@@ -184,8 +184,8 @@ async function saveData(doLock = false) {
                 document.body.classList.add('is-taking-screenshot');
                 
                 try {
-                    // Give more time for fonts and layouts to settle
-                    await new Promise(r => setTimeout(r, 800));
+                    // Wait briefly for the browser to apply the CSS specifically for the snapshot
+                    await new Promise(r => setTimeout(r, 200));
                     
                     const c = await html2canvas(elements.mainContent, {
                         scale: 2.5, 
