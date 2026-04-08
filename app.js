@@ -180,10 +180,49 @@ async function saveData(doLock = false) {
             
             // Overhaul: Target the container of panels specifically and force vertical stack
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 3, // Keep high resolution for text clarity
+                scale: 2.5, // 2.5x is the sweet spot for file size vs clarity
                 logging: false,
                 useCORS: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#f8fafc',
+                onclone: (clonedDoc) => {
+                    // Force the capture area to a controlled, professional width
+                    const clonedMain = clonedDoc.getElementById('main-content-area');
+                    if (clonedMain) {
+                        clonedMain.style.width = '1300px'; 
+                        clonedMain.style.padding = '40px';
+                        clonedMain.style.margin = '0 auto';
+                        clonedMain.style.boxShadow = 'none';
+                        clonedMain.style.backgroundColor = '#f8fafc';
+
+                        // Critical: Fix the Grid columns that html2canvas often fails to compute
+                        const grid = clonedMain.querySelector('.content-grid');
+                        if (grid) {
+                            grid.style.display = 'flex';
+                            grid.style.flexDirection = 'row';
+                            grid.style.justifyContent = 'center';
+                            grid.style.gap = '24px';
+                            grid.style.width = '100%';
+                            
+                            // Ensure each panel has a defined width and is visible
+                            grid.querySelectorAll('.panel').forEach(p => {
+                                p.style.flex = '0 0 380px'; // Fixed size panels to prevent "stretching"
+                                p.style.display = 'block';
+                                p.style.visibility = 'visible';
+                                p.style.opacity = '1';
+                                p.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)'; // Prettier for snapshot
+                            });
+                        }
+
+                        // Ensure bottom dashboard is also contained well
+                        const dashboard = clonedMain.querySelector('.result-dashboard');
+                        if (dashboard) {
+                            dashboard.style.display = 'flex';
+                            dashboard.style.gap = '20px';
+                            dashboard.style.marginTop = '30px';
+                            dashboard.querySelectorAll('.result-item').forEach(i => i.style.flex = '1');
+                        }
+                    }
+                }
             });
             screenshot = canvas.toDataURL('image/png'); 
         } catch (e) {
