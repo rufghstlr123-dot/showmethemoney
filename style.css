@@ -1156,6 +1156,13 @@ body.history-mode .result-note {
 body.is-taking-screenshot {
     overflow: visible !important;
     height: auto !important;
+    font-family: 'Outfit', 'Inter', sans-serif !important;
+}
+
+body.is-taking-screenshot * {
+    font-family: 'Outfit', 'Inter', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    text-shadow: none !important;
 }
 
 body.is-taking-screenshot .app-container {
@@ -1165,6 +1172,8 @@ body.is-taking-screenshot .app-container {
     min-height: 0 !important;
     background-color: #f8fafc !important;
     overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 body.is-taking-screenshot .sidebar {
@@ -1173,7 +1182,7 @@ body.is-taking-screenshot .sidebar {
 
 body.is-taking-screenshot .main-content {
     width: 1400px !important;
-    padding: 35px !important;
+    padding: 40px !important;
     background-color: #f8fafc !important;
     height: auto !important;
     overflow: visible !important;
@@ -1182,36 +1191,43 @@ body.is-taking-screenshot .main-content {
 body.is-taking-screenshot .main-header {
     width: 100% !important;
     position: static !important;
-    margin-bottom: 25px !important;
+    margin-bottom: 30px !important;
 }
 
 body.is-taking-screenshot .content-grid {
     display: flex !important;
     flex-direction: row !important;
+    align-items: stretch !important; /* Forces equal height for all panels */
     justify-content: space-between !important;
-    gap: 15px !important;
+    gap: 20px !important;
     width: 100% !important;
     margin-bottom: 30px !important;
 }
 
 body.is-taking-screenshot .panel {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     flex: 1 1 0 !important;
     min-width: 0 !important;
     margin-bottom: 0 !important;
-    padding: 20px !important;
+    padding: 24px !important;
     visibility: visible !important;
     opacity: 1 !important;
+    background-color: #ffffff !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
-    height: auto !important;
+    border-radius: 16px !important;
+}
+
+body.is-taking-screenshot .panel > div {
+    width: 100% !important;
 }
 
 body.is-taking-screenshot .result-dashboard {
-    display: grid !important; /* Switch to grid for better 3-col control */
+    display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     width: 100% !important;
-    gap: 15px !important;
+    gap: 20px !important;
     margin-top: 30px !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -1220,10 +1236,11 @@ body.is-taking-screenshot .result-dashboard {
 body.is-taking-screenshot .result-item {
     display: flex !important;
     flex-direction: column !important;
-    padding: 15px !important;
-    border-radius: 12px !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
     background-color: #ffffff !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 
 body.is-taking-screenshot .result-item.full-width {
@@ -1231,13 +1248,15 @@ body.is-taking-screenshot .result-item.full-width {
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
+    padding: 20px 40px !important;
 }
 
 body.is-taking-screenshot .result-note {
     display: block !important;
     text-align: right !important;
-    margin-top: 15px !important;
+    margin-top: 20px !important;
+    padding-right: 10px !important;
     font-weight: 700 !important;
-    color: #64748b !important;
+    color: #94a3b8 !important;
     visibility: visible !important;
 }
