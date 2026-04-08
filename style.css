@@ -891,7 +891,8 @@ hr {
 .monthly-mode .gift-input-close,
 .monthly-mode .result-input,
 .monthly-mode .panel .btn-outline-danger,
-.monthly-mode .sidebar-footer {
+.monthly-mode .sidebar-footer,
+.history-mode .sidebar-footer {
     display: none !important;
 }
 

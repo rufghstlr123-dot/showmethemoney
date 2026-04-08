@@ -156,16 +156,15 @@ async function saveData(doLock = false) {
     let screenshot = null;
     if (doLock) {
         try {
-            // Take screenshot of the entire app container (including sidebar)
-            const captureArea = document.querySelector('.app-container');
-            const canvas = await html2canvas(captureArea, {
-                scale: 2, // 2x scale for balanced file size and crisp text
+            // Take screenshot of main content area
+            const canvas = await html2canvas(elements.mainContent, {
+                scale: 2.5, // High resolution
                 logging: false,
                 useCORS: true,
                 backgroundColor: '#f8fafc',
-                windowWidth: 1600 // Force standard landscape layout
+                windowWidth: 1400 // Ensure consistent layout (avoid wide screen tiny text)
             });
-            screenshot = canvas.toDataURL('image/jpeg', 0.9); // 90% high quality
+            screenshot = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
         } catch (e) {
             console.error("Screenshot Error:", e);
         }
