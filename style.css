@@ -1153,11 +1153,18 @@ body.history-mode .result-note {
 }
 
 /* Snapshot Stealth Mode - Forces perfect horizontal layout for html2canvas */
+body.is-taking-screenshot {
+    overflow: visible !important;
+    height: auto !important;
+}
+
 body.is-taking-screenshot .app-container {
     display: block !important;
     width: 1400px !important;
     height: auto !important;
+    min-height: 0 !important;
     background-color: #f8fafc !important;
+    overflow: visible !important;
 }
 
 body.is-taking-screenshot .sidebar {
@@ -1168,6 +1175,8 @@ body.is-taking-screenshot .main-content {
     width: 1400px !important;
     padding: 35px !important;
     background-color: #f8fafc !important;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 body.is-taking-screenshot .main-header {
@@ -1182,6 +1191,7 @@ body.is-taking-screenshot .content-grid {
     justify-content: space-between !important;
     gap: 15px !important;
     width: 100% !important;
+    margin-bottom: 30px !important;
 }
 
 body.is-taking-screenshot .panel {
@@ -1194,18 +1204,40 @@ body.is-taking-screenshot .panel {
     opacity: 1 !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
+    height: auto !important;
 }
 
 body.is-taking-screenshot .result-dashboard {
-    display: flex !important;
-    flex-direction: row !important;
+    display: grid !important; /* Switch to grid for better 3-col control */
+    grid-template-columns: repeat(3, 1fr) !important;
     width: 100% !important;
     gap: 15px !important;
-    margin-top: 25px !important;
+    margin-top: 30px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 body.is-taking-screenshot .result-item {
     display: flex !important;
-    flex: 1 !important;
-    margin-bottom: 0 !important;
+    flex-direction: column !important;
+    padding: 15px !important;
+    border-radius: 12px !important;
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+body.is-taking-screenshot .result-item.full-width {
+    grid-column: 1 / -1 !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+body.is-taking-screenshot .result-note {
+    display: block !important;
+    text-align: right !important;
+    margin-top: 15px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    visibility: visible !important;
 }
