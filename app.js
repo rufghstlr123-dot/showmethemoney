@@ -1,6 +1,6 @@
 // Firebase Library Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // Firebase Configuration (본인의 설정값으로 교체 필요)
 const firebaseConfig = {
@@ -594,7 +594,8 @@ async function openHistory() {
                 </div>
                 <div class="history-actions">
                     ${photoBtn}
-                    <button class="btn-restore" data-ts="${ts}">🔄 복원하기</button>
+                    <button class="btn-restore" data-ts="${ts}">🔄 복구</button>
+                    <button class="btn-delete-history" data-ts="${ts}">🗑️ 삭제</button>
                 </div>
             `;
             
@@ -602,6 +603,7 @@ async function openHistory() {
                 item.querySelector('.btn-view-img').onclick = () => openImagePreview(data, timeStr);
             }
             item.querySelector('.btn-restore').onclick = () => restoreHistory(data, timeStr);
+            item.querySelector('.btn-delete-history').onclick = () => deleteHistory(dateStr, ts, timeStr);
             elements.historyList.appendChild(item);
         });
     } catch (err) {
@@ -646,6 +648,20 @@ async function restoreHistory(data, timeStr) {
     await saveData(); // Save the restored state as the current state
     alert(`${timeStr} 데이터로 복원되었습니다.`);
     closeHistory();
+}
+
+async function deleteHistory(dateStr, ts, timeStr) {
+    if (!confirm(`${timeStr} 백업 기록을 영구적으로 삭제하시겠습니까?\n삭제된 기록은 복구할 수 없습니다.`)) return;
+    
+    try {
+        const historyRef = ref(db, `closing_v2/history/${dateStr}/${ts}`);
+        await remove(historyRef);
+        alert('백업 기록이 삭제되었습니다.');
+        openHistory(); // Refresh the list
+    } catch (err) {
+        console.error("Delete Error:", err);
+        alert('삭제 중 오류가 발생했습니다.');
+    }
 }
 
 function renderCalendar() {

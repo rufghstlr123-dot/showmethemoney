@@ -1128,3 +1128,26 @@ body.history-mode .result-note {
     color: var(--primary-color);
 }
 
+
+.btn-delete-history {
+    background: none;
+    border: 1px solid #fee2e2;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #ef4444;
+    transition: all 0.2s;
+}
+
+.btn-delete-history:hover {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+}
+
+.history-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
