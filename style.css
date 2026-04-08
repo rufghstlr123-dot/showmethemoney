@@ -1152,11 +1152,12 @@ body.history-mode .result-note {
     align-items: center;
 }
 
-/* Snapshot Stealth Mode - Forces perfect layout for html2canvas */
+/* Snapshot Stealth Mode - Forces perfect horizontal layout for html2canvas */
 body.is-taking-screenshot .app-container {
     display: block !important;
-    width: 1200px !important;
+    width: 1400px !important;
     height: auto !important;
+    background-color: #f8fafc !important;
 }
 
 body.is-taking-screenshot .sidebar {
@@ -1164,39 +1165,47 @@ body.is-taking-screenshot .sidebar {
 }
 
 body.is-taking-screenshot .main-content {
-    width: 1200px !important;
-    padding: 30px !important;
-    transform: none !important;
+    width: 1400px !important;
+    padding: 35px !important;
+    background-color: #f8fafc !important;
 }
 
 body.is-taking-screenshot .main-header {
     width: 100% !important;
     position: static !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 25px !important;
 }
 
 body.is-taking-screenshot .content-grid {
-    display: block !important; /* Killer fix for missing panels */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
     width: 100% !important;
 }
 
 body.is-taking-screenshot .panel {
     display: block !important;
-    width: 100% !important;
-    margin-bottom: 25px !important;
-    page-break-inside: avoid;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 20px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
 }
 
 body.is-taking-screenshot .result-dashboard {
-    display: block !important;
+    display: flex !important;
+    flex-direction: row !important;
     width: 100% !important;
+    gap: 15px !important;
+    margin-top: 25px !important;
 }
 
 body.is-taking-screenshot .result-item {
-    display: block !important;
-    width: 100% !important;
-    margin-bottom: 10px !important;
+    display: flex !important;
+    flex: 1 !important;
+    margin-bottom: 0 !important;
 }
