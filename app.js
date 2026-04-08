@@ -828,6 +828,15 @@ function setupEventListeners() {
     if (elements.btnAdminLogout) {
         elements.btnAdminLogout.addEventListener('click', () => {
             state.userMode = 'guest';
+            // Force return to daily view on logout
+            state.viewMode = 'daily';
+            
+            // Update Navigation UI
+            if (elements.navDaily) elements.navDaily.classList.add('active');
+            if (elements.navMonthly) elements.navMonthly.classList.remove('active');
+            if (elements.navWeekly) elements.navWeekly.classList.remove('active');
+            if (elements.navHistory) elements.navHistory.classList.remove('active');
+            
             loadData();
             renderDate();
             calculateTotals();
