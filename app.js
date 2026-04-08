@@ -158,11 +158,13 @@ async function saveData(doLock = false) {
         try {
             // Take screenshot of main content area
             const canvas = await html2canvas(elements.mainContent, {
-                scale: 1, // Lower scale for smaller file size
+                scale: 2.5, // High resolution
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                backgroundColor: '#f8fafc',
+                windowWidth: 1400 // Ensure consistent layout (avoid wide screen tiny text)
             });
-            screenshot = canvas.toDataURL('image/jpeg', 0.6); // 60% quality jpeg
+            screenshot = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
         } catch (e) {
             console.error("Screenshot Error:", e);
         }
