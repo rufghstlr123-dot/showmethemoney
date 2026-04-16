@@ -21,9 +21,10 @@ const db = getDatabase(firebaseApp);
 let state = {
     currentDate: new Date(),
     viewMode: 'daily',
-    userMode: 'guest', // default to guest
+    userMode: 'guest', 
     author: '',
     isLocked: false,
+    isDataLoaded: false, // NEW: Safety flag to prevent saving before initial load
     pisAmount: null,
     giftOpenCount: { 5000: null, 10000: null, 50000: null },
     giftOutCount: { 5000: null, 10000: null, 50000: null },
@@ -145,11 +146,15 @@ function getHistoryPath(date) {
     return `closing_v2/history/${y}-${m}-${d}/${timestamp}`;
 }
 
-async function saveData(doLock = false) {
+async function saveData(doLock = false, forcedData = null) {
     if (state.viewMode !== 'daily') return;
     
+    // Safety Lock: Prevent saving until data is fully loaded from server
+    // This prevents "Empty State" from overwriting existing data during fast navigation
+    if (!state.isDataLoaded && !forcedData) return;
+
     // If the data is being loaded by the listener, don't trigger a save loop
-    if (state.isLocked && !doLock && state.userMode !== 'admin') return;
+    if (state.isLocked && !doLock && state.userMode !== 'admin' && !forcedData) return;
 
     if (doLock) state.isLocked = true;
     
@@ -211,16 +216,22 @@ async function saveData(doLock = false) {
 
 
     const path = getDatePath(state.currentDate);
-    const dataToSave = {
-        author: state.author,
-        isLocked: state.isLocked,
-        pisAmount: state.pisAmount,
-        giftOpen: { ...state.giftOpenCount },
-        giftOut: { ...state.giftOutCount },
-        giftClose: { ...state.giftCloseCount },
-        cash: { ...state.cashCount },
-        lastUpdated: new Date().getTime()
-    };
+    let dataToSave;
+
+    if (forcedData) {
+        dataToSave = { ...forcedData, lastUpdated: new Date().getTime() };
+    } else {
+        dataToSave = {
+            author: state.author,
+            isLocked: state.isLocked,
+            pisAmount: state.pisAmount,
+            giftOpen: { ...state.giftOpenCount },
+            giftOut: { ...state.giftOutCount },
+            giftClose: { ...state.giftCloseCount },
+            cash: { ...state.cashCount },
+            lastUpdated: new Date().getTime()
+        };
+    }
     
     if (screenshot) dataToSave.screenshot = screenshot;
 
@@ -238,6 +249,8 @@ async function saveData(doLock = false) {
 }
 
 async function loadData() {
+    state.isDataLoaded = false; // Reset loading state
+
     // Remove previous listener if exists
     if (currentListener) {
         currentListener();
@@ -275,6 +288,7 @@ async function loadData() {
 
         currentListener = onValue(dataRef, (snapshot) => {
             const data = snapshot.val();
+            state.isDataLoaded = true; // Mark as loaded safely
             if (data) {
                 state.pisAmount = (data.pisAmount !== undefined) ? data.pisAmount : null;
                 state.author = data.author || '';
@@ -659,7 +673,7 @@ function closeImagePreview() {
 async function restoreHistory(data, timeStr) {
     if (!confirm(`${timeStr} 시점의 데이터로 복원하시겠습니까?\n현재 입력된 데이터는 덮어씌워집니다.`)) return;
     
-    // Update state with historical data
+    // Update local state with historical records
     state.pisAmount = (data.pisAmount !== undefined) ? data.pisAmount : null;
     state.author = data.author || '';
     state.isLocked = data.isLocked || false;
@@ -669,9 +683,24 @@ async function restoreHistory(data, timeStr) {
     state.cashCount = data.cash || { 50000: null, 10000: null, 5000: null, 1000: null, 500: null, 100: null, 50: null, 10: null };
     
     updateUIOnly();
-    await saveData(); // Save the restored state as the current state
+
+    // Forced saving: bypass normal checks to ensure restoration persists
+    const dataToForce = {
+        author: state.author,
+        isLocked: state.isLocked,
+        pisAmount: state.pisAmount,
+        giftOpen: { ...state.giftOpenCount },
+        giftOut: { ...state.giftOutCount },
+        giftClose: { ...state.giftCloseCount },
+        cash: { ...state.cashCount }
+    };
+
+    await saveData(false, dataToForce);
+    
+    // Explicitly reload to finalize state
+    loadData();
+
     alert(`${timeStr} 데이터로 복원되었습니다.`);
-    closeHistory();
 }
 
 async function deleteHistory(dateStr, ts, timeStr) {
@@ -754,7 +783,6 @@ function blockNonNumeric(e) {
 
 function setupEventListeners() {
     elements.btnPrevDay.addEventListener('click', () => {
-        saveData();
         if (state.viewMode === 'monthly') {
             state.currentDate.setMonth(state.currentDate.getMonth() - 1);
         } else if (state.viewMode === 'weekly') {
@@ -775,7 +803,6 @@ function setupEventListeners() {
     });
 
     elements.btnNextDay.addEventListener('click', () => {
-        saveData();
         if (state.viewMode === 'monthly') {
             state.currentDate.setMonth(state.currentDate.getMonth() + 1);
         } else if (state.viewMode === 'weekly') {
