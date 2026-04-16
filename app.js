@@ -238,9 +238,8 @@ async function saveData(doLock = false, forcedData = null) {
     try {
         await set(ref(db, path), dataToSave);
         
-        // Save history snapshot if it's a lock action or contains actual content
-        const hasContent = state.pisAmount !== null || state.author !== '' || Object.values(state.giftOpenCount).some(v => v !== null);
-        if (doLock || (hasContent && Math.random() < 0.1)) { // random 10% chance for regular saves to avoid bloat, or 100% on lock
+        // Save history snapshot only on manual Daily Lock
+        if (doLock) {
              await set(ref(db, getHistoryPath(state.currentDate)), dataToSave);
         }
     } catch (err) {
