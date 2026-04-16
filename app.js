@@ -673,6 +673,9 @@ function closeImagePreview() {
 async function restoreHistory(data, timeStr) {
     if (!confirm(`${timeStr} 시점의 데이터로 복원하시겠습니까?\n현재 입력된 데이터는 덮어씌워집니다.`)) return;
     
+    // Switch state to daily view to show results
+    state.viewMode = 'daily';
+
     // Update local state with historical records
     state.pisAmount = (data.pisAmount !== undefined) ? data.pisAmount : null;
     state.author = data.author || '';
@@ -682,7 +685,20 @@ async function restoreHistory(data, timeStr) {
     state.giftCloseCount = data.giftClose || { 5000: null, 10000: null, 50000: null };
     state.cashCount = data.cash || { 50000: null, 10000: null, 5000: null, 1000: null, 500: null, 100: null, 50: null, 10: null };
     
+    // UI Update immediate
     updateUIOnly();
+    
+    // Highlight the Daily tab in sidebar
+    if (elements.navDaily) {
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        elements.navDaily.classList.add('active');
+    }
+    
+    if (elements.historyViewArea) elements.historyViewArea.style.display = 'none';
+    if (elements.mainContent) {
+        elements.mainContent.style.display = '';
+        elements.mainContent.style.opacity = '1';
+    }
 
     // Forced saving: bypass normal checks to ensure restoration persists
     const dataToForce = {
@@ -697,10 +713,12 @@ async function restoreHistory(data, timeStr) {
 
     await saveData(false, dataToForce);
     
-    // Explicitly reload to finalize state
+    // Re-initialize listener for the restored date to ensure real-time sync
     loadData();
 
-    alert(`${timeStr} 데이터로 복원되었습니다.`);
+    setTimeout(() => {
+        alert(`${timeStr} 데이터로 복원되었습니다. \n(날짜: ${elements.displayDate.textContent})`);
+    }, 100);
 }
 
 async function deleteHistory(dateStr, ts, timeStr) {
